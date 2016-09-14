@@ -1,70 +1,75 @@
 //go:generate mockgen -source sqllib.go -destination mockgen_test.go -package sqllib_test
 
-
 package sqllib
 
 import (
-	"crypto/sha256"
 	"database/sql"
 	"sync"
 
 	"github.com/pkg/errors"
 )
 
-func makeKey(b []byte) Key {
-	h := sha256.Sum256(b)
-	k := Key{}
-	for i := 0; i < sha256.Size; i++ {
-		k[i] = h[i]
-	}
-	return Key(k)
-}
-
-type Key [sha256.Size]byte
+// DB is declared so we can mock-test. You do not really have to
+// think about this. Just assume it's the value returned from
+// database/sql.Open
 type DB interface {
 	Prepare(string) (*sql.Stmt, error)
 }
+
+// Entry is an SQL statement registered to the library. This holds
+// a reference to the prepared SQL statement (*sql.Stmt), but the
+// statement is only prepared lazily.
 type Entry struct {
 	mutex sync.Mutex
 	sql   string
 	stmt  *sql.Stmt
 }
+
+// Library represents the top-level structure that holds the
+// SQL statements.
 type Library struct {
 	db    DB
 	mutex sync.RWMutex
-	stmts map[Key]*Entry
+	stmts map[string]*Entry
 }
 
 func New(db DB) *Library {
 	return &Library{
 		db:    db,
-		stmts: make(map[Key]*Entry),
+		stmts: make(map[string]*Entry),
 	}
 }
 
-func (l *Library) Register(sql string) Key {
-	k := makeKey([]byte(sql))
-
+func (l *Library) Register(key, sql string) error {
 	l.mutex.Lock()
-	l.stmts[k] = &Entry{sql: sql}
+	l.stmts[key] = &Entry{sql: sql}
 	l.mutex.Unlock()
-	return k
+	return nil
 }
 
-func (l *Library) GetStmt(k Key) (*sql.Stmt, error) {
+func (l *Library) GetStmt(key string) (*sql.Stmt, error) {
 	l.mutex.RLock()
-	e, ok := l.stmts[k]
+	e, ok := l.stmts[key]
 	l.mutex.RUnlock()
 
 	if !ok {
 		return nil, errors.New("statement not found")
 	}
 
+	stmt, err := e.prepare(l.db)
+	if err != nil {
+		return nil, errors.Wrap(err, "lazy-prepare failred")
+	}
+
+	return stmt, nil
+}
+
+func (e *Entry) prepare(db DB) (*sql.Stmt, error) {
 	e.mutex.Lock()
 	defer e.mutex.Unlock()
 
 	if e.stmt == nil {
-		stmt, err := l.db.Prepare(e.sql)
+		stmt, err := db.Prepare(e.sql)
 		if err != nil {
 			return nil, errors.Wrap(err, "failed to prepare statement")
 		}

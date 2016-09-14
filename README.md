@@ -13,17 +13,16 @@ import (
 var lib *sqllib.Library
 var db *sql.DB
 
-var queryKey sqllib.Key
 func InitializeDB() {
   db, _ = sql.Open(...)
 
   lib = sqllib.New(db)
 
-  queryKey = lib.Register("SELECT foo FROM bar WHERE a = ?")
+  queryKey = lib.Register("Simple Select", "SELECT foo FROM bar WHERE a = ?")
 }
 
 func SomeFunc(tx *sql.Tx, arg string) error {
-  stmt, err := lib.Get(queryKey)
+  stmt, err := lib.GetStmt("Simple Select")
   if err != nil {
     return errors.Wrap(err, "failed to get statement")
   }
@@ -32,3 +31,5 @@ func SomeFunc(tx *sql.Tx, arg string) error {
   ...
 }
 ```
+
+# DESCRIPTION

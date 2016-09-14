@@ -16,12 +16,11 @@ func TestBasic(t *testing.T) {
 	lib := sqllib.New(db)
 
 	db.EXPECT().Prepare("SELECT 1")
-	key, err := lib.Register("SELECT 1")
-	if !assert.NoError(t, err, "Library.Register should succeed") {
+	if !assert.NoError(t, lib.Register("select", "SELECT 1"), "Library.Register should succeed") {
 		return
 	}
 
-	stmt, err := lib.GetStmt(key)
+	stmt, err := lib.GetStmt("select")
 	if !assert.NoError(t, err, "Library.GetStmt should succeed") {
 		return
 	}
