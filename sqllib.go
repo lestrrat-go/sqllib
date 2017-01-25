@@ -30,24 +30,24 @@ type Entry struct {
 type Library struct {
 	db    DB
 	mutex sync.RWMutex
-	stmts map[string]*Entry
+	stmts map[interface{}]*Entry
 }
 
 func New(db DB) *Library {
 	return &Library{
 		db:    db,
-		stmts: make(map[string]*Entry),
+		stmts: make(map[interface{}]*Entry),
 	}
 }
 
-func (l *Library) Register(key, sql string) error {
+func (l *Library) Register(key interface{}, sql string) error {
 	l.mutex.Lock()
 	l.stmts[key] = &Entry{sql: sql}
 	l.mutex.Unlock()
 	return nil
 }
 
-func (l *Library) GetStmt(key string) (*sql.Stmt, error) {
+func (l *Library) GetStmt(key interface{}) (*sql.Stmt, error) {
 	l.mutex.RLock()
 	e, ok := l.stmts[key]
 	l.mutex.RUnlock()
