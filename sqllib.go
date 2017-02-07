@@ -58,7 +58,7 @@ func (l *Library) GetStmt(key interface{}) (*sql.Stmt, error) {
 
 	stmt, err := e.prepare(l.db)
 	if err != nil {
-		return nil, errors.Wrap(err, "lazy-prepare failred")
+		return nil, errors.Wrap(err, "lazy-prepare failed")
 	}
 
 	return stmt, nil
