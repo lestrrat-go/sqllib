@@ -42,8 +42,11 @@ func New(db DB) *Library {
 
 func (l *Library) Register(key interface{}, sql string) error {
 	l.mutex.Lock()
+	defer l.mutex.Unlock()
+	if _, ok := l.stmts[key]; ok {
+		return errors.New("duplicate key found")
+	}
 	l.stmts[key] = &Entry{sql: sql}
-	l.mutex.Unlock()
 	return nil
 }
 
