@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/golang/mock/gomock"
-	sqllib "github.com/lestrrat/go-sqllib"
+	sqllib "github.com/lestrrat-go/sqllib"
 	"github.com/stretchr/testify/assert"
 )
 

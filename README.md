@@ -2,15 +2,15 @@
 
 Maintain a library of prepared SQL statements (\*sql.Stmt)
 
-[![Build Status](https://travis-ci.org/lestrrat/go-sqllib.png?branch=master)](https://travis-ci.org/lestrrat/go-sqllib)
+[![Build Status](https://travis-ci.org/lestrrat-go/sqllib.png?branch=master)](https://travis-ci.org/lestrrat-go/sqllib)
 
-[![GoDoc](https://godoc.org/github.com/lestrrat/go-sqllib?status.svg)](https://godoc.org/github.com/lestrrat/go-sqllib)
+[![GoDoc](https://godoc.org/github.com/lestrrat-go/sqllib?status.svg)](https://godoc.org/github.com/lestrrat-go/sqllib)
 
 # SYNOPSIS
 
 ```go
 import (
-  "github.com/lestrrat/go-sqllib"
+  "github.com/lestrrat-go/sqllib"
   "github.com/pkg/errors"
 )
 
